@@ -10,6 +10,7 @@ interface Config {
   ROOT: string;
   timeout: number;
   PROJECT_NAME: string;
+  TOKEN: string;
 }
 
 const config: Config = snykConfig(__dirname + '/../..');
