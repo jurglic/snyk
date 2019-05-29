@@ -7,7 +7,6 @@ import * as config from '../../lib/config';
 import {isCI} from '../../lib/is-ci';
 import {exists as apiTokenExists} from '../../lib/api-token';
 import {SEVERITIES, WIZARD_SUPPORTED_PMS} from '../../lib/snyk-test/common';
-import * as docker from '../../lib/docker-promotion';
 import * as Debug from 'debug';
 import {TestOptions} from '../../lib/types';
 import {isLocalFolder} from '../../lib/detect';
@@ -238,11 +237,6 @@ function displayResult(res, options: TestOptions & OptionsAtDisplayStage) {
   }
   const testedInfoText = `Tested ${pathOrDepsText} for known ${issuesText}`;
 
-  let dockerSuggestion = '';
-  if (docker.shouldSuggestDocker(options)) {
-    dockerSuggestion += chalk.bold.white(docker.suggestionText);
-  }
-
   let multiProjAdvice = '';
 
   if (options.advertiseSubprojectsCount) {
@@ -267,8 +261,7 @@ function displayResult(res, options: TestOptions & OptionsAtDisplayStage) {
       prefix + meta + summaryOKText + multiProjAdvice + (
         isCI() ? '' :
           dockerAdvice +
-          nextStepsText +
-          dockerSuggestion)
+          nextStepsText)
     );
   }
 
@@ -300,21 +293,6 @@ function displayResult(res, options: TestOptions & OptionsAtDisplayStage) {
     summary += chalk.bold.green('\n\nRun `snyk wizard` to address these issues.');
   }
 
-  if (options.docker &&
-    (config.disableSuggestions !== 'true')) {
-    const optOutSuggestions =
-      '\n\nTo remove this message in the future, please run `snyk config set disableSuggestions=true`';
-    if (!options.file) {
-      dockerSuggestion += chalk.bold.white('\n\nPro tip: use `--file` option to get base image remediation advice.' +
-        `\nExample: $ snyk test --docker ${options.path} --file=path/to/Dockerfile`) + optOutSuggestions;
-    } else if (!options['exclude-base-image-vulns']) {
-      dockerSuggestion +=
-        chalk.bold.white(
-          '\n\nPro tip: use `--exclude-base-image-vulns` to exclude from display Docker base image vulnerabilities.') +
-          optOutSuggestions;
-    }
-  }
-
   const vulns = res.vulnerabilities || [];
   const groupedVulns = groupVulnerabilities(vulns);
   const sortedGroupedVulns = _.orderBy(
@@ -335,7 +313,7 @@ function displayResult(res, options: TestOptions & OptionsAtDisplayStage) {
     groupedVulnInfoOutput.join('\n\n') + '\n\n\n' +
     groupedDockerBinariesVulnInfoOutput.join('\n\n') + '\n\n' + meta + summary;
 
-  return prefix + body + multiProjAdvice + dockerAdvice + dockerSuggestion;
+  return prefix + body + multiProjAdvice + dockerAdvice;
 }
 
 function formatDockerBinariesIssues(

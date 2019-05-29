@@ -14,7 +14,6 @@ import * as spinner from '../../lib/spinner';
 import * as detect from '../../lib/detect';
 import * as plugins from '../../lib/plugins';
 import {ModuleInfo} from '../../lib/module-info'; // TODO(kyegupov): fix import
-import * as docker from '../../lib/docker-promotion';
 import {SingleDepRootResult, MultiDepRootsResult, isMultiResult, MonitorError } from '../../lib/types';
 
 const SEPARATOR = '\n-------------------------------------------------------\n';
@@ -252,10 +251,6 @@ function formatMonitorOutput(
         'and are now on a free 14-day premium trial.\n' +
         'View plans here: ' + manageUrl + '\n\n') :
       '');
-
-  if (docker.shouldSuggestDocker(options)) {
-    strOutput += chalk.bold.white(docker.suggestionText);
-  }
 
   return options.json ?
     JSON.stringify(_.assign({}, res, {
