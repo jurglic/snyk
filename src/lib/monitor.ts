@@ -62,6 +62,12 @@ export function monitor(root, meta, info: SingleDepRootResult, targetFile): Prom
       const target = await projectMetadata.getInfo(pkg);
       const targetFileRelativePath = targetFile ? path.relative(root, targetFile) : '';
 
+      if (target && target.branch) {
+        analytics.add('branch', target.branch);
+      }
+
+      analytics.add('projectName', pkg.name);
+
       // TODO(kyegupov): async/await
       return new Promise((resolve, reject) => {
         request({
