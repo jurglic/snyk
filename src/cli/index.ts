@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as Debug from 'debug';
+import {isBoolean} from 'util';
 
 // assert supported node runtime version
 import * as runtime from './runtime';
@@ -134,9 +135,12 @@ async function main() {
   let failed = false;
   let exitCode = EXIT_CODES.ERROR;
   try {
-    if (args.options.file && args.options.file.match(/\.sln$/)) {
+    if (args.options.file && !isBoolean(args.options.file) && args.options.file.match(/\.sln$/)) {
       sln.updateArgs(args);
+    } else if (isBoolean(args.options.file)) {
+      throw new Error('--file flag and it\'s value should be separated by equals sign (e.g. --file=package.json)');
     }
+
     checkPaths(args);
     res = await runCommand(args);
   } catch (error) {
